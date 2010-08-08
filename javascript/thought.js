@@ -50,34 +50,34 @@ phil.Thought = Joint.dia.Element.extend(
       // Edit some undocumented options *sigh*
       // Turn off the toolbox
       this._opt.toolbox = false;
-      // Turn off ghosting for quicker dragging.
+      // Turn on ghosting for quicker dragging.
       this._opt.ghosting = true;
       this.p = properties;
-      this.p.radius = 70;
-      this.p.x_offset = this.p.radius / 2;
-      this.p.y_offset = (this.p.radius / 2) + 15;
-
+      
+      var
       // Get the label
-      var label = this.label();
+      label = this.label(),
+      
+      // The label's bounding box
+      labb = label.getBBox(),
+
+      // The circle's center is in the center of the text
+      circle_x = labb.x + (labb.width / 2),
+      circle_y = labb.y + (labb.height / 2),
+
+      // The circle's radius is half the text width, plus 10
+      radius = (labb.width / 2) + 10,
 
       // The circle for our thought
       // Note: you *need* to give it a fill colour if you want to drag it without clicking on the text or the circle itself
-      var circ = this.paper.circle(this.p.x, this.p.y, this.p.radius).attr("fill", "white");
+      circ = this.paper.circle(circle_x, circle_y, radius).attr("fill", "white");
+
       // Allow the details to be edited when the circle is clicked
-      ElementA(circ.node).then(EventA("mousedown")).then(EditA(this.p.owner, this.p.state)).then(Repeat).repeat().run();
+      ElementA(circ.node).then(EventA("mouseover")).then(EditA(this.p.owner, this.p.state)).then(Repeat).repeat().run();
       this.setWrapper(circ);
       // Add a label
       this.addInner(label);
-      // Add a button for editing this
-      this.addInner(this.edit());
    },
-
-   // Make the text monospace and bigger
-   edit_attrs: function(t)
-   {
-      t.attr("font", "courier").attr("font-family", "monospace").attr("font-size", "15");
-   },
-
 
    // Make the text bigger and sans
    label_attrs: function(t)
@@ -89,7 +89,7 @@ phil.Thought = Joint.dia.Element.extend(
    label: function()
    {
       // Create the text
-      var la = this.paper.text(bb.x, bb.y, this.p.label),
+      var la = this.paper.text(this.p.x, this.p.y, this.p.label);
       // Apply a text theme
       this.label_attrs(la);
       return la;
