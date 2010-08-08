@@ -16,70 +16,48 @@ This file is part of Philosophy.
     If not, see <http://www.gnu.org/licenses/>
 */
 
-// Object for drawing things used in philosophy.
-// Takes paper.
-function DrawPhilosophy(ra)
+// The philosophy state
+function PhilosophyState(diag, editor)
 {
-   // Instance variable, Raphael
-   paper = ra;
-
-   // Joint element creator.
-   // Takes an object and function which creates a Raphael element.
-   // Returns a Joint element for the object, with an init method that:
-   //    Sets the wrapper as the Raphael element produced when the init properties were applied to the Raphael creation function. (see http://www.jointjs.com/api/symbols/Joint.dia.Element.html#constructor)
-   this.element = function(obj, raphf, props)
-   {
-      // Add an init method to the object which sets the wrapper
-      obj.init = function(properties)
-      {
-         this.setWrapper(raphf(properties));
-      }
-
-      // The new element creator
-      var e_class = Joint.dia.Element.extend(obj);
-
-      // Return the new element.
-      return e_class.create(props);
-   }
-
-   // Takes an object,
-   // Draws a circle for it.
-   // Returns the Joint element for the object
-   this.circle = function(phil, xp, yp, rad)
-   {
-      // Properties for our new element.
-      var props = {position: {x: xp, y: yp},
-                   radius: rad};
-
-      // A function that creates a circle from raphael properties
-      function circlep(props)
-      {
-         return this.paper.circle(props.position.x, props.position.y, props.radius);
-      }
-
-     
-      return this.element(phil, circlep, props);
-   }
+   this.thoughts = {};
+   this.diagram = "#" + diag;
+   this.editor = editor; 
 }
 
+// Object for drawing things used in philosophy.
+// Takes paper.
 // Engage warp drive!
 // Takes an element id or an HTML element, and then a width and a height.
 // Returns a computations which initializes Joint, and returns a nice interface to the drawing library. 
-function philosophy(id, width, height)
+function philosophy(diagram, editor)
 {
+
+   // The screen width, editor width and diagram width
+   var 
+   width = screen.availWidth * (9.5/10), 
+   height = screen.availHeight,
+   ew = width / 4
+   , dw = width * (3/4);
+
+   var state = new PhilosophyState(diagram, editor);
+
+   // Set up the editor panel
+   editor = initialize_editor(editor, ew, state); 
+
+   // Set up the size of the diagram element.
+   $("#" + diagram).css({width: dw, "margin-left": ew});
+   
    // Initialize the diagramming library
    function Initialize(elem)
    {
-      // Initializes Raffles
-      var raph = Raphael(elem, width, height);
-
       // Initialize Joint
-      Joint.paper(raph, width, height);
+      Joint.paper(elem, dw, height);
 
-      // Return a nice interface to the drawing library. 
-      return new DrawPhilosophy(raph);
+      // Return the application state. 
+      state.editor = editor;
+      return state;
    }
 
    // Return a computation which initializes the drawing library on the given element.
-   return ElementA(id).then(Initialize);
+   return ElementA(diagram).then(Initialize);
 }
