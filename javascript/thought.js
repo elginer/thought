@@ -40,6 +40,28 @@ function VisualPhilosophy()
 
 var phil = Joint.dia.philosophy = {};
 
+// Implication arrows
+phil.implies = {
+   startArrow: {type: "none"},
+   endArrow: {type: "basic", size: 5},
+   attrs: {"stroke-dasharray": "none"}
+};
+
+// If and only if arrows
+phil.iff = {
+   startArrow: {type: "basic", size:5},
+   endArrow: {type: "basic", size: 5},
+   attrs: {"stroke-dasharray": "none"}
+};
+
+// Not implies arrows
+phil.implies_not = {
+   startArrow: {type: "none"},
+   endArrow: {type: "basic", size: 5},
+   attrs: {"stroke-dasharray": "none"},
+   label: "!"
+};
+
 // A Thought element for Joint
 phil.Thought = Joint.dia.Element.extend(
 {
@@ -61,22 +83,59 @@ phil.Thought = Joint.dia.Element.extend(
       // The label's bounding box
       labb = label.getBBox(),
 
+      // Get the edit button
+      edit = this.edit(),
+
+      // The editor's bounding box
+      edbb = edit.getBBox(),
+
+      // The radius
+      radius = 0;
+
       // The circle's center is in the center of the text
       circle_x = labb.x + (labb.width / 2),
-      circle_y = labb.y + (labb.height / 2),
+      circle_y = labb.y + ((labb.height + edbb.height + (labb.y - edbb.y)) / 2) + 5;
 
-      // The circle's radius is half the text width, plus 10
-      radius = (labb.width / 2) + 10,
+      // Find the circle's radius 
+      if (edbb.width > labb.width)
+      {
+         radius = (edbb.width / 2) + 15;
+      }
+      else
+      {
+         radius = (labb.width / 2) + 15;
+      }
 
       // The circle for our thought
       // Note: you *need* to give it a fill colour if you want to drag it without clicking on the text or the circle itself
       circ = this.paper.circle(circle_x, circle_y, radius).attr("fill", "white");
 
-      // Allow the details to be edited when the circle is clicked
-      ElementA(circ.node).then(EventA("mouseover")).then(EditA(this.p.owner, this.p.state)).then(Repeat).repeat().run();
       this.setWrapper(circ);
       // Add a label
       this.addInner(label);
+      // Add an edit button
+      this.addInner(edit);
+   },
+
+   // An edit button
+   edit: function()
+   {
+      // Create the text
+      var 
+      edit = this.paper.text(this.p.x, this.p.y + 20, "Edit"),
+      props = this.p;  
+      // Apply a text theme
+      this.edit_attrs(edit);
+
+      // Allow the details to be edited when the edit button is clicked
+      $(edit.node).click(function(){props.state.editor.edit(props.owner);})
+      return edit;
+   },
+
+   // Make the text bigger and sans
+   edit_attrs: function(t)
+   {
+      t.attr("font", "courier").attr("font-family", "monospace").attr("font-size", "15").attr("stroke", "blue");
    },
 
    // Make the text bigger and sans

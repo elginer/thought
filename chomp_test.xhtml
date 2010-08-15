@@ -1,0 +1,26 @@
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title></title>
+<meta http-equiv="Content-Type" content="application/xhtml+xml;charset=UTF-8" />
+<script type="text/javascript" src="javascript/jquery-1.4.2.js"></script>
+<script type="text/javascript" src="javascript/editor.js"></script>
+</head>
+
+<body>
+
+<p>Below you should see the phrase: "Xif this is surrounded by X's all is wellX"</p>
+<div id="test"></div>
+
+<script type="text/javascript">
+$(document).ready(function()
+{
+   $("#test").append(document.createTextNode("X" + chomp("       if this is surrounded by X's all is well        ") + "X"));
+});
+</script>
+</body>
+
+</html>

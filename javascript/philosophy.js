@@ -21,7 +21,6 @@ function PhilosophyState(diag, editor)
 {
    this.thoughts = {};
    this.diagram = "#" + diag;
-   this.editor = editor; 
 }
 
 // Object for drawing things used in philosophy.
@@ -39,10 +38,10 @@ function philosophy(diagram, editor)
    ew = width / 4
    , dw = width * (3/4);
 
-   var state = new PhilosophyState(diagram, editor);
-
+   var state = new PhilosophyState(diagram);
    // Set up the editor panel
-   editor = initialize_editor(editor, ew, state); 
+   var editor = new Editor(editor, ew, state); 
+   state.editor = editor;
 
    // Set up the size of the diagram element.
    $("#" + diagram).css({width: dw, "margin-left": ew});
@@ -53,8 +52,6 @@ function philosophy(diagram, editor)
       // Initialize Joint
       Joint.paper(elem, dw, height);
 
-      // Return the application state. 
-      state.editor = editor;
       return state;
    }
 

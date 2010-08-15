@@ -7,7 +7,7 @@ This file is part of Philosophy.
     General Public License as published by the Free Software Foundation, 
     either version 3 of the License, or any later version.
 
-    Philosophy is distributed in the hope that it 
+    Philosophy is disthis.editored in the hope that it 
     will be useful, but WITHOUT ANY WARRANTY; without even the implied 
     warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
     See the GNU General Public License for more details.
@@ -18,16 +18,33 @@ This file is part of Philosophy.
 
 */
 
-// Takes an editor and the editor width
-// Initializes the editor
-function initialize_editor(editor, ew, state)
+// chomp
+function chomp(text)
 {
-   // Set the style for the editor.
-   var ed = $("#" + editor).css({float: "left", width: ew});
+   // Check for empty
+   if (text.search(/\S/) === -1)
+   {
+      return "";
+   }
+   else
+   {
+      // Chomp it.  Yes, I worked that out for fun.
+      return text.replace(/^\s*((\S+\s+)*?\S+)\s*$/, "$1");
+   }
+}
 
+// Initializes the editor
+// Takes the editor element and the width the element should be, and the state
+function Editor(editor, ew, state)
+{
+   // Hold on to the state
+   this.state = state;
+
+   // Set the style for the editor.
+   this.editor = $("#" + editor).css({float: "left", width: ew});
 
    // A widget for creating a new thought
-   function new_thought()
+   this.new_thought = function()
    {
       // Heading for creating a thought
       var head = document.createElement("h2");
@@ -41,10 +58,14 @@ function initialize_editor(editor, ew, state)
       $(create).attr("type", "button");
       $(create).val("Think it");
 
+      // Me
+      var me = this;
+
       // Add a new thought
       function add_thought()
       {
-         var val = $(inp).val();
+         // Chomp the input
+         var val = chomp($(inp).val());
          // Check for valid thought
          if (val.length > 0)
          {
@@ -52,7 +73,7 @@ function initialize_editor(editor, ew, state)
             var thought = new Thought(val, {thinker: "", text: ""});
             // Run the computation to draw the thought.
             var drawA = thought.draw(300, 300);
-            drawA(state);
+            drawA(me.state);
          }
          else
          {  // Ho ho ho!
@@ -73,27 +94,15 @@ function initialize_editor(editor, ew, state)
    }
 
    // Reset the editor back to its original state.
-   function reset()
+   this.reset = function()
    {
-      $(ed.empty());
-      $(ed).append(new_thought());
-      return ed;
+      $(this.editor).empty();
+      $(this.editor).append(this.new_thought());
+      return this.editor;
    }
 
-   // Add a method to the editor element that resets it.
-   ed.reset = reset;
-   // Reset the editor
-   ed.reset();
-   return ed;
-   
-}
-
-// Arrow for editting a thought
-function EditA(thought, state)
-{
-
    // Display the thought itself
-   function thought_title()
+   function thought_title(thought)
    {
       // Heading for the thought
       var thoughth = document.createElement("h2");
@@ -114,7 +123,7 @@ function EditA(thought, state)
    }
 
    // An edit box
-   function edit_box(field)
+   function edit_box(thought, field)
    {
       // Box to surround the field
       var editp = document.createElement("p");
@@ -136,8 +145,11 @@ function EditA(thought, state)
    }
 
    // Destroy the thought
-   function destroy()
+   this.destroy = function(thought)
    {
+      // me
+      var me = this;
+
       // Destroy the thought
       function destroyer(e)
       {// Only proceed if you're sure
@@ -146,7 +158,7 @@ function EditA(thought, state)
             // Delete the thought
             thought.unthink();
             // Clean the editor
-            state.editor.reset();
+            me.reset();
          }
       }
 
@@ -159,13 +171,13 @@ function EditA(thought, state)
    }
 
    // Edit the thought
-   function edit()
+   this.edit = function(thought)
    {
       // Get a clean editor
-      editor = state.editor.reset();
+      var editor = this.reset();
 
       // Print the title of the thought
-      $(editor).append(thought_title());
+      $(editor).append(thought_title(thought));
 
       // Edit fields 
       for(var detail in thought.details)
@@ -173,14 +185,15 @@ function EditA(thought, state)
          // In Haskell, I'd delete the key.  But Javascript, I'd have to clone the object, and then delete the key....
          if (detail)
           {
-             $(editor).append(edit_box(detail));
+             $(editor).append(edit_box(thought, detail));
           }
       }
 
       // A button to destroy the idea
-      $(editor).append(destroy());
+      $(editor).append(this.destroy(thought));
    }
 
-   return edit;
+   // Reset the editor
+   this.reset();
 }
 
