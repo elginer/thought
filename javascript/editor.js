@@ -33,6 +33,22 @@ function chomp(text)
    }
 }
 
+// Add an implication
+function add_implication()
+{
+   new_arrow("implies");
+}
+
+// Add a new arrow
+function new_arrow(name)
+{
+   // Find the arrow
+   var arrow = phil[name];
+
+   // Draw the arrow
+   Joint({x: 100, y: 100}, {x:200, y: 200}, arrow).registerForever(phil.thought_elements);
+}
+
 // Initializes the editor
 // Takes the editor element and the width the element should be, and the state
 function Editor(editor, ew, state)
@@ -60,7 +76,7 @@ function Editor(editor, ew, state)
 
       // Me
       var me = this;
-
+      
       // Add a new thought
       function add_thought()
       {
@@ -69,7 +85,7 @@ function Editor(editor, ew, state)
          // Check for valid thought
          if (val.length > 0)
          {
-            // Create a new thought with that name
+             // Create a new thought with that name
             var thought = new Thought(val, {thinker: "", text: ""});
             // Run the computation to draw the thought.
             var drawA = thought.draw(300, 300);
@@ -79,7 +95,7 @@ function Editor(editor, ew, state)
          {  // Ho ho ho!
             alert("Error: This is philosophy.  Give your thought a name.");
          }
-      
+
       }
 
       $(create).click(add_thought);
@@ -89,7 +105,15 @@ function Editor(editor, ew, state)
       $(box).append(inp);
       $(box).append(create);
 
-      // Return the creation element
+      // Button to create new implication arrow
+      var implies = document.createElement("input");
+      $(implies).attr("type", "button");
+      $(implies).val("Implication");
+      $(implies).click(add_implication);
+
+      $(box).append(implies);
+
+      // Return the editor element
       return box;
    }
 
@@ -182,11 +206,7 @@ function Editor(editor, ew, state)
       // Edit fields 
       for(var detail in thought.details)
       {
-         // In Haskell, I'd delete the key.  But Javascript, I'd have to clone the object, and then delete the key....
-         if (detail)
-          {
-             $(editor).append(edit_box(thought, detail));
-          }
+         $(editor).append(edit_box(thought, detail));
       }
 
       // A button to destroy the idea

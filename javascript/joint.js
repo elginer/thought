@@ -218,12 +218,12 @@ function Joint(from, to, opt){
         endObject = this._end;
 
     if (from.x && from.y)	// from is point?
-	JointDOMBuilder.dummy(startObject, from, this._opt.dummy.start);
+	JointDOMBuilder.dummy(startObject, from, this._opt.dummy.start, this.paper);
     else
 	startObject.shape = from.yourself();
 
     if (to.x && to.y)		// to is point?
-	JointDOMBuilder.dummy(endObject, to, this._opt.dummy.end);
+	JointDOMBuilder.dummy(endObject, to, this._opt.dummy.end, this.paper);
     else
 	endObject.shape = to.yourself();
 
@@ -1293,9 +1293,13 @@ var JointDOMBuilder = {
 	this.labelLocation = labelLocation;
 	return this;
     },
-    dummy: function(startOrEnd, pos, opt){
+    dummy: function(startOrEnd, pos, opt, paper){
+   if (this.paper != undefined)
+   {
+      paper = this.paper;
+   }
 	startOrEnd.dummy = true;
-	startOrEnd.shape = this.paper.circle(pos.x, pos.y, opt.radius).attr(opt.attrs);
+	startOrEnd.shape = paper.circle(pos.x, pos.y, opt.radius).attr(opt.attrs);
 	startOrEnd.shape.show();
 	return startOrEnd.shape;
     },

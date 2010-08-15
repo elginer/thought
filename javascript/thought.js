@@ -62,6 +62,9 @@ phil.implies_not = {
    label: "!"
 };
 
+// Collection of thought elements
+phil.thought_elements = [];
+
 // A Thought element for Joint
 phil.Thought = Joint.dia.Element.extend(
 {
@@ -75,7 +78,10 @@ phil.Thought = Joint.dia.Element.extend(
       // Turn on ghosting for quicker dragging.
       this._opt.ghosting = true;
       this.p = properties;
-      
+     
+      // Store this thought in the collection, save our index.
+      this.num = phil.thought_elements.push(this) - 1;
+ 
       var
       // Get the label
       label = this.label(),
@@ -152,6 +158,16 @@ phil.Thought = Joint.dia.Element.extend(
       // Apply a text theme
       this.label_attrs(la);
       return la;
+   },
+
+   // Destroy this element
+   die: function ()
+   {
+      // Delete this from the collection of thought elements
+      phil.thought_elements.splice(this.num, 1);
+
+      // Liquidate
+      this.liquidate();
    }
 
 });
@@ -184,7 +200,7 @@ function Thought(thought, dets)
    {
       if (this.element)
       {
-         this.element.liquidate();
+         this.element.die();
       }
       delete this;
    }
