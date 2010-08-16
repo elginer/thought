@@ -39,6 +39,19 @@ function add_implication()
    new_arrow("implies");
 }
 
+// Add an iff arrow
+function add_iff()
+{
+   new_arrow("iff");
+}
+
+// Add an implies not arrow
+function add_implies_not()
+{
+   new_arrow("implies_not");
+}
+
+
 // Add a new arrow
 function new_arrow(name)
 {
@@ -47,6 +60,16 @@ function new_arrow(name)
 
    // Draw the arrow
    Joint({x: 100, y: 100}, {x:200, y: 200}, arrow).registerForever(phil.thought_elements);
+}
+
+// Create a simple button
+function simple_button(name, func)
+{
+   var but = document.createElement("input");
+   $(but).attr("type", "button");
+   $(but).val(name);
+   $(but).click(func);
+   return but;
 }
 
 // Initializes the editor
@@ -106,12 +129,17 @@ function Editor(editor, ew, state)
       $(box).append(create);
 
       // Button to create new implication arrow
-      var implies = document.createElement("input");
-      $(implies).attr("type", "button");
-      $(implies).val("Implication");
-      $(implies).click(add_implication);
+      var implies = simple_button("Implication", add_implication); 
+      // Button to create iff arrow
+      var iff = simple_button("If and only if", add_iff);
+      // Button to create implies not arrow
+      var implies_not = simple_button("Implies not", add_implies_not);
+ 
 
+      // Add these to the box
       $(box).append(implies);
+      $(box).append(implies_not);
+      $(box).append(iff);
 
       // Return the editor element
       return box;

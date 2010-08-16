@@ -38,28 +38,55 @@ function VisualPhilosophy()
    }
 }
 
+// The philosophy namespace
 var phil = Joint.dia.philosophy = {};
 
+// Attributes for the handle caps
+large_handle_attrs =
+{
+   radius: 10,
+   attrs:
+   {
+      fill: "green",
+      stroke: "black"
+   }
+}
+
+// A large handle for grabbing the arrows
+large_handle =
+{
+   timeout: 4000,
+   start: large_handle_attrs,
+   end: large_handle_attrs
+}
+
 // Implication arrows
-phil.implies = {
+phil.implies = 
+{
    startArrow: {type: "none"},
-   endArrow: {type: "basic", size: 5},
-   attrs: {"stroke-dasharray": "none"}
+   endArrow: {type: "basic", size: 5, },
+   attrs: {"stroke-dasharray": "none"},
+   handle: large_handle
 };
 
 // If and only if arrows
-phil.iff = {
+phil.iff = 
+{
    startArrow: {type: "basic", size:5},
    endArrow: {type: "basic", size: 5},
-   attrs: {"stroke-dasharray": "none"}
+   attrs: {"stroke-dasharray": "none"},
+   handle: large_handle
+
 };
 
 // Not implies arrows
-phil.implies_not = {
+phil.implies_not = 
+{
    startArrow: {type: "none"},
    endArrow: {type: "basic", size: 5},
    attrs: {"stroke-dasharray": "none"},
-   label: "!"
+   label: "not",
+   handle: large_handle
 };
 
 // Collection of thought elements

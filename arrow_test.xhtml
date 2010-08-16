@@ -1,0 +1,62 @@
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>Arrow test</title>
+
+<meta http-equiv="Content-Type" content="application/xhtml+xml;charset=UTF-8" />
+<script type="text/javascript" src="javascript/jquery-1.4.2.js"></script>
+
+<script type="text/javascript" src="javascript/raphael.js"></script>
+
+<script type="text/javascript" src="javascript/joint.js"></script>
+<script type="text/javascript" src="javascript/joint.dia.js"></script>
+
+
+<script type="text/javascript" src="javascript/arrowlets-alpha-20081103.js"></script>
+<script type="text/javascript" src="javascript/underscore.js"></script>
+
+<script type="text/javascript" src="javascript/thought.js"></script>
+<script type="text/javascript" src="javascript/philosophy.js"></script>
+<script type="text/javascript" src="javascript/editor.js"></script>
+
+<link rel="stylesheet" type="text/css" href="style/philosophy.css"/>
+
+</head>
+
+<body>
+
+   <div id="editor">
+      <!-- The editor -->
+      <p>
+         Javascript is not enabled.  This application will not work.
+      </p>
+   </div>
+
+   <div id="diagram">
+      <!-- Where we draw the thought -->      
+   </div>
+
+<script type="text/javascript">
+
+$(document).ready(function()
+{
+   // Engage warp drive!
+   var world = philosophy("diagram", "editor");
+
+   world.run();
+
+   $("#editor").empty();
+   add_implication();
+   add_iff();
+   add_implies_not();
+
+})
+
+ </script>
+
+</body>
+
+</html>
