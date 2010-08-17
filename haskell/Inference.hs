@@ -9,6 +9,8 @@
    again in javascript
 -}
 
+module Inference where
+
 -- We use mutable arrays here for dynamic programming
 import Data.Array.IO
 
@@ -197,6 +199,17 @@ atom_to_int rels =
    atom_int :: Map Atom Int
    atom_int = M.fromList $ zip (M.keys rels) [0 ..]
 
+-- Write a new relation to the relationship array
+new_relation :: RelationArray
+             -> Int
+             -> Int
+             -> ZRelation
+             -> Set BinaryRelation
+             -> ArrValidator ()
+new_relation arr from to rel bin_set = do
+   nest <- readArray arr from
+   new_relation_nest nest to rel bin_set
+
 -- Write a new relationship to the nested array
 new_relation_nest :: IOArray Int (Maybe ZRelation, Set BinaryRelation)
                   -> Int
@@ -274,7 +287,39 @@ create_array imap =
 
 -- Find more relations and update the array
 find_relationships :: RelationArray -> ArrValidator () 
-find_relationships arr = undefined 
+find_relationships arr = do
+   more <- find_more
+   when more $ find_relationships arr
+   where
+   -- Apply transformations to find more relationships
+   find_more = do
+      rels <- find_implicators arr
+      find_composites rels arr
+
+-- Find the next relationships in a chain
+find_composites :: Set ((Int, Int), Set BinaryRelation)
+                -> RelationArray
+                -> ArrValidator Bool
+find_composites imps arr = do
+   consequence_array <- lift $ lift consequences
+   F.foldrM (\i b -> do
+      r <- uncurry chain i
+      return $ r || b) False imps
+   where
+   chain :: (Int, Int)
+         -> Set BinaryRelation
+         -> ArrValidator Bool
+   chain (from, to) bin_set = do
+      table <- fmap getAssocs $ readArray from arr
+      fmap any $ mapM (uncurry new_relation) table
+      where
+      new_composite_relation :: Int -> (Maybe ZRelation, Set BinaryRelation) -> ArrValidator Bool
+      new_composite_relation second_to (mrel, snd_bn_set) =
+         maybe (return False) (\rel -> new_composite_relation' rel >> return True) mrel 
+         where
+         new_composite_relation' :: ZRelation -> ArrValidator ()
+         new_composite_relation rel =
+            new_relation arr from second_to rel $ bin_set `union` snd_bn_set
 
 -- Find invalid propositions
 check_validity :: RelationArray -> ArrValidator ()
@@ -308,7 +353,7 @@ read_rarr arr top nest =
 read_mrarr :: RelationArray -> Int -> Int -> IO (Maybe ZRelation, Set BinaryRelation)
 read_mrarr arr top nest =
    readArray arr top >>= flip readArray nest
-   
+
 -- Find implicators: get all Implies in the array
 -- Return the operands of the all the Implies and their assocated BinaryRelations
 find_implicators :: RelationArray -> ArrValidator (Set ((Int, Int), Set BinaryRelation))
