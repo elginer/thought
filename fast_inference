@@ -1,0 +1,113 @@
+Unfortunately, I am unable to develop Obelisk at the moment, due to multiple hardware failures and university assignments which mean I haven't yet had time to set up my dev pc yet.  Must order components...
+
+In the mean-time I have been working on a website for a friend.  It is a visual editor of interconnected philosophical concepts.  The last couple of days I have been working on an inference engine which will display errors to the users.
+
+Essentially, it's a simple verifier of propositional logic.  A bit boring for a philosopher, but it's a challenge for a programmer because it will be implemented in Javascript and will have to be very, very fast, or it will ruin the website.
+
+Currently, I'm writing a prototype in Haskell because I am trying to design this algorithm and it the process is made easier when its structure can be checked for consistency by the type-checker.
+
+Hence, this is my attempt to create a fast algorithm:
+
+What you have is a number of concepts.  For the sake of this discussion/rant, we might as well call them A,B,C... etc.
+
+Each concept may have zero or one relationship with every concept.
+The relationships available so far are:
+
+implies (if A then B)
+if and only if (if A then B and if B then A)
+implies not (if A then not B)
+
+Now how to validate this quickly?
+
+Lets have an example!
+The input is a series of invalid statements in propositional logic:
+A if and only if B
+B implies C
+C implies not A
+
+The first stage of validation is to transform all iffs to two implications using the following rule:
+
+P if and only if Q = P implies Q, Q implies P
+
+So we now have
+A implies B
+B implies A
+B implies C
+C implies not A
+
+Then each concept is mapped onto an integer.  If our input is: this case, A would become 0, and B would become 1.  So now you have
+
+0 implies 1
+1 implies 0
+1 implies 2
+2 implies not 1
+
+Then you create a two-dimensional array where a cell at (y, x) contains the relationship between concept x and concept y.
+
+I chose this method to avoid doing unnecessary work - this is <a href="http://www.catonmat.net/blog/mit-introduction-to-algorithms-part-ten">dynamic programming</a>.  The overlapping sub-problems occur because it infers relationships between variables, which itself requires inference of relationships between other variables.
+
+So our table is:
+
+&nbsp;&nbsp;&nbsp;x
+&nbsp;|_|0|1|2|
+y|0|_|I|_|
+&nbsp;|1|I|_|I|
+&nbsp;|2|_|_|N|
+
+Key: I for implies, N for implies not
+
+Then I observe that for all logical operations
+
+P implies Q operation Z implies P operation Q
+
+Hence
+P implies Q implies not Z implies P implies not Z
+
+Now, we have a systematic method of finding new relationships.  Pseudocode:
+
+while&nbspnew_relationships&nbspis&nbspnot&nbspempty:
+&nbsp&nbsp&nbspfor&nbsptable(y,x)&nbspin&nbspnew_relationships:
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbspif&nbsptable(y,x)&nbsp==&nbspI
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspthen
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsplet&nbspzs&nbsp=&nbsptable(x)
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspfor&nbspz&nbspin&nbspzs:
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspif&nbspset&nbsptable(y,z)&nbspto&nbsptable(x,&nbspz)
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspthen
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspinsert&nbsptable(y)&nbspinto&nbspnew_relationships
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspfor&nbsptable(q,y)&nbspin&nbsptable
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspinsert&nbsptable(q,y)&nbspinto&nbspnew_relationships
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+
+Note that setting the value at table(x, y) should output an error to the user if a value is already present at that location, in this case, a new relation has not been found.
+
+Note also that this procedure will halt when no new relationships can be found.
+
+Our table is now
+&nbsp;&nbsp;&nbsp;x
+&nbsp;|_|0|1|2|
+y|0|I|I|I|
+&nbsp;|1|I|_|I|
+&nbsp;|2|_|_|N|
+
+
+Now we enjoy the benefits of this approach: invalid statements can be found without searching through an agglomeration of data-structures.
+
+In our simplified scheme, the only invalid series of statements are of the form:
+P implies Q (if p then q)
+Q implies not P (if q then not p)
+
+This is invalid as P can never be true.
+
+Now to find the invalid statements.  Pseudo code:
+if table(x, y) == I and table(y, x) == N
+&nbsp;&nbsp;&nbsp;then
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;invalid proposition
+
+And the user can be notified
+
+Unfortunately, what I haven't done is worked out the complexity of such a scheme.  What I know is it depends not only on the size of the input but on its interconnectedness.
+
+However, this approach does save work, compared to a simple search.
+What matters, and what will be answered in the next couple of days is: will a javascript implementation of the above run bloody fast?
+
+Questions, questions....
